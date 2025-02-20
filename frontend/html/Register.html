@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFC Rental System</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        h1, h2 {
+            color: #333;
+            text-align: center;
+        }
+        h1 {
+            font-size: 28px;
+            font-weight: bold;
+        }
+        h2 {
+            font-size: 22px;
+            font-weight: bold;
+        }
+        .container {
+            max-width: 450px;
+            width: 100%;
+            padding: 20px;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        input, button {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+        }
+        button {
+            cursor: pointer;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #218838;
+        }
+        .home-button {
+            background-color: #007bff;
+        }
+        .home-button:hover {
+            background-color: #0056b3;
+        }
+        #response {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: #e9ecef;
+            text-align: left;
+            display: none;
+        }
+        .info-text {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            text-align: left;
+            line-height: 1.6;
+        }
+        .warning-text {
+            color: red;
+            font-weight: bold;
+            font-size: 18px;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>NFC Rental System</h1>
+    <div class="container">
+        <form id="itemForm">
+            <label for="itemName">Item Name:</label>
+            <input type="text" id="itemName" name="itemName" required>
+
+            <label for="pricePerDay">Price Per Day:</label>
+            <input type="number" id="pricePerDay" name="pricePerDay" required>
+
+            <label for="price">Total Price:</label>
+            <input type="number" id="price" name="price" required>
+
+            <label for="description">Description:</label>
+            <input type="text" id="description" name="description" required>
+
+            <label for="ownerName">Owner Name:</label>
+            <input type="text" id="ownerName" name="ownerName" required>
+
+            <label for="phone">Phone:</label>
+            <input type="text" id="phone" name="phone" required>
+
+            <label for="password">Password:</label>
+            <input type="password" id="password" name="password" required>
+
+            <label>
+                <input type="checkbox" id="available" name="available" checked>
+                Available
+            </label>
+
+            <button type="submit">Submit</button>
+        </form>
+
+        <button onclick="goHome()" class="home-button">🏠 Home</button>
+    </div>
+
+    <div id="response">
+        <h1>Link Generated 🎉</h1>
+        <h2>Now you need to store this link on your NFC tag.</h2>
+        <p class="info-text">
+            ✅ **Step 1:** Copy the link below. <br>
+            ✅ **Step 2:** Press the <b>"SCAN"</b> button. <br>
+            ✅ **Step 3:** Bring your NFC tag close to your phone. The link will be written automatically. <br>
+        </p>
+
+        
+
+        <p class="info-text">
+            💡 If you prefer to manually write the link to your NFC tag like a real CHAD 🗿,  
+            we recommend using the 
+            <a href="https://play.google.com/store/apps/details?id=com.wakdev.wdnfc&pcampaignid=web_share" target="_blank">NFC Tools</a> app.
+        </p>
+        
+        <h2>🔗 Your NFC Link:</h2>
+        <h3><p>Link: <a id="backendLink" target="_blank"></a></p></h3>
+        
+        <button onclick="copyLink()">📋 Copy Link</button>
+        <p class="warning-text">⚠️ WARNING: Do NOT scan without copying the URL to your clipboard!</p>
+        <button onclick="writeToNFC()">📲 SCAN</button>
+    </div>
+
+    <script>
+        document.getElementById('itemForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            // Get the current date and time
+            const currentDate = new Date();
+            const formattedDate = currentDate.toISOString().split('T')[0]; // Extracts only the date part (e.g., "2023-10-05") // Format as ISO string (e.g., "2023-10-05T12:34:56.789Z")
+
+            const formData = {
+                itemName: document.getElementById('itemName').value,
+                pricePerDay: parseFloat(document.getElementById('pricePerDay').value),
+                price: parseFloat(document.getElementById('price').value),
+                description: document.getElementById('description').value,
+                ownerName: document.getElementById('ownerName').value,
+                phone: document.getElementById('phone').value,
+                password: document.getElementById('password').value,
+                available: document.getElementById('available').checked,
+                dateOfUpload: formattedDate, // Add the current date and time
+            };
+
+            const backendUrl = 'https://nfc-rental-system2-1.onrender.com/items';
+
+            fetch(backendUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(formData)
+            })
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('backendLink').href = data;
+                document.getElementById('backendLink').textContent = data;
+                document.getElementById('response').style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            });
+        });
+
+        function goHome() {
+            window.location.href = 'home.html';
+        }
+
+        function copyLink() {
+            const linkText = document.getElementById('backendLink').textContent;
+            navigator.clipboard.writeText(linkText).then(() => {
+                alert('Link copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy link: ', err);
+            });
+        }
+
+        async function writeToNFC() {
+            if (!("NDEFReader" in window)) {
+                alert("Your browser does not support NFC writing.");
+                return;
+            }
+
+            try {
+                const nfcWriter = new NDEFReader();
+                await nfcWriter.write(document.getElementById('backendLink').textContent);
+                alert("Link successfully written to NFC tag!");
+            } catch (error) {
+                console.error("Error writing to NFC:", error);
+                alert("Failed to write NFC tag. Make sure your device supports NFC and try again.But dont worry we are currently working with generating QR code alternative for NFC tag, will be soon released !.");
+            }
+        }
+    </script>
+</body>
+</html>
