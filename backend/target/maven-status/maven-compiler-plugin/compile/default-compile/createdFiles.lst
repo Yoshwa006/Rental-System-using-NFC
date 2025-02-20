@@ -1,0 +1,6 @@
+com/example/mongo/backend/controller/Controller.class
+com/example/mongo/backend/Item/Item.class
+com/example/mongo/backend/service/ItemService.class
+com/example/mongo/backend/Item/Main.class
+com/example/mongo/backend/NfcRentalApplication.class
+com/example/mongo/backend/repo/ItemRepo.class
